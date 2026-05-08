@@ -17,7 +17,7 @@ const stories = [ {
   num_comments: 1,
 },];
 
-function App () {
+const App = () => {
   return(
     <>
       <Header/>
@@ -29,11 +29,11 @@ function App () {
   );
 }
 
-function List() {
+const List = () => {
   return (
     <ul>
     {
-      stories.map(function (item){
+      stories.map((item) => {
         return (
           <li key={item.objectID} >
             <span><a href={item.url}>{item.title}</a></span>
@@ -49,19 +49,19 @@ function List() {
   );
 }
 
-function Search() {
+const Search = () => {
+  const handleChange = (event) => {
+    console.log(event);
+    console.log(event.target.value);
+  }
   return (
     <>
       <label htmlFor="search">Search:</label>
-      <input id="search" type="text"></input>
+      <input id="search" type="text" onChange={handleChange}></input>
     </>
   );
 }
 
-function Header() {
-  return (
-  <h1>Hacker news</h1>
-  );
-}
+const Header = () => <h1>Hacker news</h1> ;
 
 export default App; 
