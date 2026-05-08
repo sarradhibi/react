@@ -2,7 +2,7 @@ import * as React from "react" ;
 
 
 const App = () => {
-  const stories = [ {
+  const initialStories = [ {
     title: "React" ,
     url: "https://reactjs.org/",
     author: "John Doe",
@@ -20,6 +20,13 @@ const App = () => {
   },
   ];
   const [searchTerm , setSearchTerm] = React.useState(localStorage.getItem('search') || 'React' );
+  const [stories , setStories] = React.useState(initialStories);
+  const handleRemoveStory = (item) => {
+    const newStories = stories.filter (
+      (story) => item.objectID !== story.objectID
+    );
+    setStories(newStories);
+  }
   React.useEffect (() => {
     localStorage.setItem ('search', searchTerm)
   }, [searchTerm] );
@@ -34,42 +41,42 @@ const App = () => {
     <>
       <Header/>
       <br/>
-      <Search onSearch={handleSearch} searchTerm={searchTerm}/>
-      <List stories={searchedStories}/>
+      <InputWithLabel id="search" type="text" value={searchTerm} onInputChange={handleSearch}><strong>Search:</strong></InputWithLabel>
+      <List stories={searchedStories} onRemoveItem={handleRemoveStory}/>
     </>
-
   );
 }
 
-const List = ({stories}) => {
+const List = ({stories, onRemoveItem}) => {
   return (
     <ul>
     {
-      stories.map((item) => <Item key={item.objectID} item={item} />
+      stories.map((item) => <Item key={item.objectID} item={item} onRemoveItem={onRemoveItem} />
       )
     }
     </ul>
   );
 }
 
-const Search = (props) => {
-  const {searchTerm, onSearch} = props;
+const InputWithLabel = ({id, type, value, onInputChange, children}) => {
   return (
     <>
-      <label htmlFor="search">Search:</label>
-      <input id="search" type="text" onChange={onSearch} value={searchTerm}></input>
-      <p>Searching for <strong>{searchTerm}</strong></p>
+      <label htmlFor={id}>{children}</label>
+      <input id={id} type={type} onChange={onInputChange} value={value}></input>
+      <p>Searching for <strong>{value}</strong></p>
     </>
   );
 }
 
-const Item = ({item}) => {
+const Item = ({item, onRemoveItem}) => {
   return (
     <li>
       <span><a href={item.url}>{item.title}</a></span>
       <span> {item.author}</span>
-      <span> {item.points}</span>
-      <span> {item.num_comments}</span>
+      <span> | {item.points} points</span>
+      <span> | {item.num_comments} comments</span>
+      <span> | <button type="button" onClick={()=> onRemoveItem(item)}>Remove</button>
+      </span>
     </li>
   );
 }
