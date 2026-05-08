@@ -20,7 +20,30 @@ const App = () => {
   },
   ];
   const [searchTerm , setSearchTerm] = React.useState(localStorage.getItem('search') || 'React' );
+  const API_ENDPOINT = 'http://hn.algolia.com/api/v1/search?query=' ;
   const [stories , setStories] = React.useState(initialStories);
+  const [isError , setIsError] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [url, setUrl] = React.useState (`${API_ENDPOINT}${searchTerm}`);
+  const handleSearchSubmit = () => {
+    setUrl(`${API_ENDPOINT}${searchTerm}`);
+  };
+  React.useEffect (() => {
+    if (!searchTerm) return ;
+    
+    setIsLoading(true);
+
+    fetch(url)
+      .then ((response) => response.json())
+      .then ((result) => {
+        setIsLoading(false);
+        setStories(result.hits)
+      })
+      .catch (() => {
+        setIsLoading(false);
+        setIsError(true);
+      })
+  }, [url]);
   const handleRemoveStory = (item) => {
     const newStories = stories.filter (
       (story) => item.objectID !== story.objectID
@@ -42,7 +65,10 @@ const App = () => {
       <Header/>
       <br/>
       <InputWithLabel id="search" type="text" value={searchTerm} onInputChange={handleSearch}><strong>Search:</strong></InputWithLabel>
-      <List stories={searchedStories} onRemoveItem={handleRemoveStory}/>
+      <button type="button" disabled={!searchTerm} onClick={handleSearchSubmit}>Submit</button>
+      <p>Searching for <strong>{searchTerm}</strong></p>
+      {isError && <p><i>Something went wrong...</i></p>}
+      {isLoading? (<p><i>Loading...</i></p>) : (<List stories={stories} onRemoveItem={handleRemoveStory}/>)}
     </>
   );
 }
@@ -63,7 +89,7 @@ const InputWithLabel = ({id, type, value, onInputChange, children}) => {
     <>
       <label htmlFor={id}>{children}</label>
       <input id={id} type={type} onChange={onInputChange} value={value}></input>
-      <p>Searching for <strong>{value}</strong></p>
+      
     </>
   );
 }
@@ -72,7 +98,7 @@ const Item = ({item, onRemoveItem}) => {
   return (
     <li>
       <span><a href={item.url}>{item.title}</a></span>
-      <span> {item.author}</span>
+      <span> | {item.author}</span>
       <span> | {item.points} points</span>
       <span> | {item.num_comments} comments</span>
       <span> | <button type="button" onClick={()=> onRemoveItem(item)}>Remove</button>
