@@ -19,30 +19,33 @@ const App = () => {
     num_comments: 1,
   },
   ];
-  const [searchTerm , setSearchTerm] = React.useState('');
-  const handleChange = (event) => {
+  const [searchTerm , setSearchTerm] = React.useState(localStorage.getItem('search') || 'React' );
+  React.useEffect (() => {
+    localStorage.setItem ('search', searchTerm)
+  }, [searchTerm] );
+  const handleSearch = (event) => {
     setSearchTerm(event.target.value);
     console.log(event.target.value);
   };
-  const searchedStories = stories.filter(function (story) {
+  const searchedStories = stories.filter((story) => {
     return story.title.toLowerCase().includes(searchTerm.toLowerCase());
   });
   return(
     <>
       <Header/>
       <br/>
-      <Search onSearch={handleChange} searchTerm={searchTerm}/>
+      <Search onSearch={handleSearch} searchTerm={searchTerm}/>
       <List stories={searchedStories}/>
     </>
 
   );
 }
 
-const List = (props) => {
+const List = ({stories}) => {
   return (
     <ul>
     {
-      props.stories.map((item) => <Item key={item.objectID} item={item} />
+      stories.map((item) => <Item key={item.objectID} item={item} />
       )
     }
     </ul>
@@ -50,22 +53,23 @@ const List = (props) => {
 }
 
 const Search = (props) => {
+  const {searchTerm, onSearch} = props;
   return (
     <>
       <label htmlFor="search">Search:</label>
-      <input id="search" type="text" onChange={props.onSearch}></input>
-      <p>Searching for <strong>{props.searchTerm}</strong></p>
+      <input id="search" type="text" onChange={onSearch} value={searchTerm}></input>
+      <p>Searching for <strong>{searchTerm}</strong></p>
     </>
   );
 }
 
-const Item = (props) => {
+const Item = ({item}) => {
   return (
     <li>
-      <span><a href={props.item.url}>{props.item.title}</a></span>
-      <span> {props.item.author}</span>
-      <span> {props.item.points}</span>
-      <span> {props.item.num_comments}</span>
+      <span><a href={item.url}>{item.title}</a></span>
+      <span> {item.author}</span>
+      <span> {item.points}</span>
+      <span> {item.num_comments}</span>
     </li>
   );
 }
